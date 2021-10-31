@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContestController;
+use App\Http\Controllers\StoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,5 +68,36 @@ Route::group(
         Route::post('category', [CategoryController::class, 'store']);
         Route::put('category/{id}', [CategoryController::class, 'update']);
         Route::delete('category/{id}', [CategoryController::class, 'destory']);
+    }
+);
+
+
+// Contest
+
+Route::group(
+    [
+        'prefix' => '/'
+    ],
+    function ($router) {
+        Route::get('contests', [ContestController::class, 'index']);
+        Route::get('contest/{id}', [ContestController::class, 'show']);
+        Route::post('contest', [ContestController::class, 'store']);
+        Route::put('contest/{id}', [ContestController::class, 'update']);
+        Route::delete('contest/{id}', [ContestController::class, 'destory']);
+    }
+);
+
+// Story
+
+Route::group(
+    [
+        'prefix' => '/'
+    ],
+    function ($router) {
+        Route::get('stories', [StoryController::class, 'index']);
+        Route::get('story/{id}', [StoryController::class, 'show']);
+        Route::post('story', [StoryController::class, 'store']);
+        Route::put('story/{id}', [StoryController::class, 'update']);
+        Route::delete('story/{id}', [StoryController::class, 'destory']);
     }
 );

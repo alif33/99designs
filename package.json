@@ -13,7 +13,7 @@
         "seed": "php artisan db:seed",
         "rb": "php artisan migrate:rollback --step=15",
         "refresh": "yarn rb && yarn mr && yarn seed",
-        "make": "php artisan make:model Category -cfms",
+        "make": "php artisan make:model Story -cfms",
         "next": ""
     },
     "devDependencies": {
