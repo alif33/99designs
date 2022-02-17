@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contest;
-use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -12,13 +12,42 @@ class ContestController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:user', ['except' => ['index']]);
+        $this->middleware('auth:user', ['except' => ['index', 'find', 'show']]);
     }
 
     public function index()
     {
-        return Contest::all();
+        return Contest::where(
+            'status' , 1
+        )->get();
     }
+
+    public function find( $slug )
+    {   
+    
+        return Contest::where([
+            'slug' => $slug,
+            'status' => 1
+        ]
+           
+        )->orderBy('id', 'DESC')->first();
+    }
+    public function show( $id )
+    {   
+    
+        return Contest::where([
+            'id' => $id,
+            'status' => 1
+        ])->orderBy('id', 'DESC')->first();
+    }
+
+    public function fetch()
+    {
+        return Contest::where(
+            'posted_by' , Auth::user()->id
+        )->orderBy('id', 'DESC')->get();
+    }
+
 
     public function store(Request $request)
     {   
@@ -26,10 +55,12 @@ class ContestController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'title' => 'required|string|between:2,30|unique:contests',
-                'description' => 'string|between:2,30',
-                'image' => 'string|between:2,30',
-                'status' => 'boolean',
+                'contest_title' => 'required|string|between:2,500|unique:contests',
+                'contest_description' => 'string|between:2,10000',
+                'image' => 'mimes:png,jpg,jpeg,gif|max:2048',
+                'contest_prize' => 'integer',
+                'start_date' => 'required|string',
+                'end_date' => 'required|string',
             ]
         );
 
@@ -41,23 +72,49 @@ class ContestController extends Controller
             );
         }
 
-        $author = [
-            'posted_by' => Auth::user()->id
-        ];
-
-        $contest = Contest::create(
-            array_merge(
-                $author,
-                $validator->validated()
-            )
-        );
-
-        if($contest){
-            return response()->json(
-                ['message'=>'Contest created successfully !'],
-                422
-            );    
+        if ($image = $request->file('image')) {
+            $contest = Contest::create(
+                array_merge(
+                    [   
+                        'slug' => Str::slug($request->input('contest_title'), '-'),
+                        'contest_image' => $image->store('contests', 'public'),
+                        'posted_by' => Auth::user()->id
+                    ],
+                    $validator->validated()
+                )
+            );
+    
+            if($contest){
+                return response()->json(
+                    [   
+                        'success'=>true,
+                        'message'=>'Contest created successfully !'
+                    ],
+                    201
+                );    
+            }
+        }else{
+            $contest = Contest::create(
+                array_merge(
+                    [   
+                        'slug' => Str::slug($request->input('contest_title'), '-'),
+                        'posted_by' => Auth::user()->id
+                    ],
+                    $validator->validated()
+                )
+            );
+    
+            if($contest){
+                return response()->json(
+                    [   
+                        'success'=>true,
+                        'message'=>'Contest created successfully !'
+                    ],
+                    201
+                );    
+            }
         }
+
     }
 
     public function update(Request $request, $id)

@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use Laravel\Sanctum\HasApiTokens;
+use Overtrue\LaravelLike\Traits\Liker;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Overtrue\LaravelFavorite\Traits\Favoriter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Liker, Favoriter;
 
     /**
      * The attributes that are mass assignable.

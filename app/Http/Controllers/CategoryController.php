@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +17,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return Category::all();
+        return Category::orderBy('id', 'DESC')->get();
     }
 
     public function store(Request $request)
@@ -26,11 +27,13 @@ class CategoryController extends Controller
             $request->all(),
             [
                 'category_name' => 'required|string|between:2,30|unique:categories',
-                'category_slug' => 'string|between:2,30',
                 'category_icon' => 'string|between:2,30',
-                'category_image' => 'string|between:2,30',
+                'image' => 'mimes:png,jpg,jpeg,gif|max:2048',
             ]
         );
+
+
+
 
         if ($validator->fails()) {
             return response()->json(
@@ -39,17 +42,48 @@ class CategoryController extends Controller
             );
         }
 
-        $category = Category::create(
-            array_merge(
-                $validator->validated()
-            )
-        );
 
-        if($category){
-            return response()->json(
-                ['message'=>'Category created successfully !'],
-                422
-            );    
+        if ($image = $request->file('image')) {
+            
+            $category = Category::create(
+                array_merge(
+                    $validator->validated(),
+                    [   
+                        'category_slug' => Str::slug( $request->input('category_name'), '-'),
+                        'category_image' => $image->store('categories', 'public')
+                    ]
+                )
+            );
+    
+            if($category){
+                return response()->json(
+                    [   
+                        'success' => true,
+                        'message'=>'Category created successfully !'
+                    ],
+                    201
+                );    
+            }
+
+        }else{
+            $category = Category::create(
+                array_merge(
+                    $validator->validated(),
+                    [   
+                        'category_slug' => Str::slug($request->input('category_name'), '-')
+                    ]
+                )
+            );
+    
+            if($category){
+                return response()->json(
+                    [   
+                        'success' => true,
+                        'message'=>'Category created successfully !'
+                    ],
+                    201
+                );    
+            }
         }
     }
 

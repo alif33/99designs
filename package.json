@@ -11,9 +11,9 @@
         "s": "php artisan serve",
         "mr": "php artisan migrate",
         "seed": "php artisan db:seed",
-        "rb": "php artisan migrate:rollback --step=15",
-        "refresh": "yarn rb && yarn mr && yarn seed",
-        "make": "php artisan make:model Story -cfms",
+        "rb": "php artisan migrate:refresh",
+        "restart": "yarn rb && yarn mr && yarn seed",
+        "make": "php artisan make:model Tag -cfms",
         "next": ""
     },
     "devDependencies": {

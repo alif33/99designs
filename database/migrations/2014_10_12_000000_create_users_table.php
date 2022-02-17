@@ -17,6 +17,8 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('user_image')->nullable();
+            $table->string('user_bio')->nullable();
             $table->enum('membership', ['FREE', 'PREMIUM'])->default('FREE');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

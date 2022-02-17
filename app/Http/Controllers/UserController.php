@@ -24,7 +24,9 @@ class UserController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json(
-            [
+            [   
+                'success'       => true,
+                'user'          => $this->guard()->user(),
                 'token'          => $token,
                 'token_type'     => 'bearer',
                 'token_validity' => ($this->guard()->factory()->getTTL() * 60),
@@ -52,7 +54,10 @@ class UserController extends Controller
         $this->guard()->factory()->setTTL($token_validity);
 
         if (!$token = $this->guard()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Creadentials'
+            ], 401);
         }
 
         return $this->respondWithToken($token);
@@ -90,6 +95,65 @@ class UserController extends Controller
 
     }
 
+    public function profile(Request $request)
+    {   
+        // return $request->name;
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name'     => 'string|between:2,100',
+                'user_bio'    => 'string|between:2,500',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [$validator->errors()],
+                422
+            );
+        }
+
+
+        if ($img = $request->file('image')) {
+
+            $update = User::where('id', $this->guard()->user()->id)
+            ->update(
+                array_merge(
+                    [   
+                        'user_image' => $img->store('contests', 'public'),
+                    ],
+                    $validator->validated()
+                )
+            );
+
+            if($update){
+                return response()->json(
+                    [   
+                        'success' => true,
+                        'user' => User::where('id', $this->guard()->user()->id)->first(),
+                        'message' => 'User updated successfully !'
+                    ],
+                    201
+                );    
+            }
+        }else{
+            $update = User::where('id', $this->guard()->user()->id)
+            ->update($validator->validated());
+            
+            if($update){
+                return response()->json(
+                    [   
+                        'success' => true,
+                        'user' => User::where('id', $this->guard()->user()->id)->first(),
+                        'message' => 'User updated successfully !'
+                    ],
+                    201
+                );    
+            }
+           
+        }
+
+    }
 
     public function logout()
     {
@@ -99,10 +163,12 @@ class UserController extends Controller
 
     }
 
-    public function profile()
-    {
-        return response()->json($this->guard()->user());
-
+    public function verify()
+    {   
+        if (!$this->guard()->user()->hasVerifiedEmail()) {
+            $this->guard()->user()->markEmailAsVerified();
+        }
+    
     }
 
     public function refresh()

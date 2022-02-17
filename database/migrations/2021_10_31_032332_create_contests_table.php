@@ -15,11 +15,15 @@ class CreateContestsTable extends Migration
     {
         Schema::create('contests', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('description');
-            $table->string('image');
-            $table->bigInteger('posted_by')->unsigned();
-            $table->boolean('status');
+            $table->string('contest_title', 505);
+            $table->string('contest_description', 10000);
+            $table->string('slug', 505);
+            $table->string('contest_image', 505)->nullable();
+            $table->float('contest_prize');
+            $table->string('start_date');
+            $table->string('end_date');
+            $table->bigInteger('posted_by')->unsigned()->nullable();
+            $table->boolean('status')->default(0);
             $table->timestamps();
             $table->foreign('posted_by')->references('id')->on('users')->onDelete('cascade'); 
         });
