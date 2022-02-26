@@ -13,7 +13,7 @@ class StoryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:user', ['except' => ['index', 'search', 'random', 'likes', 'find']]);
+        $this->middleware('auth:user', ['except' => ['index', 'search', 'random', 'likes', 'find', 'findByTag']]);
     }
 
     public function index()
@@ -38,7 +38,9 @@ class StoryController extends Controller
 
     public function likes($id)
     {
-        return Story::find($id)->likers()->get(); 
+        return Story::find($id)
+                ->likers()
+                ->get(); 
     }
 
     public function like($id)
@@ -133,12 +135,23 @@ class StoryController extends Controller
 
     public function find($slug)
     {   
-        return Story::where('slug', $slug)->orderBy('id', 'DESC')->first();
+        return Story::where('slug', $slug)
+        ->orderBy('id', 'DESC')
+        ->with(['tags'])
+        ->first();
+    }
+
+    public function findByTag($slug)
+    {
+        return Story::with(['tags'])
+                ->whereHas('tags', function ($query) use ($slug) {
+                    $query->where('tag_slug', $slug);
+                })
+                ->get();
     }
 
     public function search($search)
     {   
-
        return Story::where('title', 'LIKE', "%$search%")
             ->orderBy('id', 'DESC')->get();
 
@@ -152,9 +165,8 @@ class StoryController extends Controller
             $request->all(),
             [
                 'title' => 'required|string|between:2,500|unique:stories',
-                'details' => 'string|between:2,1000000',
-                'summary' => 'string|between:2,500',
-                'tags' => 'string|between:2,50',
+                'details' => 'required|string|between:2,1000000',
+                'summary' => 'required|string|between:2,500',
                 'image' => 'mimes:png,jpg,jpeg,gif|max:2048',
                 'contest_id' => 'required|integer',
                 'category_id' => 'required|integer',
@@ -184,7 +196,9 @@ class StoryController extends Controller
                     $validator->validated()
                 )
             );
-    
+
+            $story->tags()->attach($request->tags);
+
             if($story){
                 return response()->json(
                     [   
@@ -206,7 +220,9 @@ class StoryController extends Controller
                     $validator->validated()
                 )
             );
-    
+
+            $story->tags()->attach($request->tags);
+
             if($story){
                 return response()->json(
                     [   
@@ -219,14 +235,14 @@ class StoryController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update($id, Request $request)
     {   
 
         $validator = Validator::make(
             $request->all(),
             [
                 [
-                    'title' => 'required|string|between:2,30|unique:stories',
+                    'title' => 'string|between:2,30|unique:stories',
                     'details' => 'string|between:2,30',
                     'summary' => 'string|between:2,30',
                     'slug' => 'string|between:2,30',
@@ -253,6 +269,8 @@ class StoryController extends Controller
                     $validator->validated()
                 )
             );
+
+            Story::findOrFail($id)->tags()->sync($request->tags);
 
             if($story)
             {

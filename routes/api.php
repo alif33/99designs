@@ -11,6 +11,7 @@ use App\Http\Controllers\ContestController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoryController;
+use App\Http\Controllers\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,11 +64,11 @@ Route::group([
 // Admin Dashboard
 
 Route::group([
-    'prefix' => 'admin'
+    'prefix' => '/admin'
 
 ], function () use ($router) {
 
-    Route::get('/contests', [AuthorityController::class, 'get_contests']);
+    Route::get('/contests', [AuthorityController::class, 'index']);
     Route::put('/contest/active/{id}', [AuthorityController::class, 'active']);
     Route::put('/contest/deactive/{id}', [AuthorityController::class, 'deactive']);
     Route::get('/stories', [AuthorityController::class, 'get_stories']);
@@ -91,6 +92,20 @@ Route::group(
         Route::post('/category', [CategoryController::class, 'store']);
         Route::put('/category/{id}', [CategoryController::class, 'update']);
         Route::delete('/category/{id}', [CategoryController::class, 'destory']);
+    }
+);
+
+
+// Tag
+
+Route::group(
+    [
+        'prefix' => '/'
+    ],
+    function ($router) {
+        Route::get('/tags', [TagController::class, 'index']);
+        Route::post('/tag', [TagController::class, 'store']);
+        Route::post('/tag/{id}/{value}', [TagController::class, 'toggle']);
     }
 );
 
@@ -122,7 +137,7 @@ Route::group(
         Route::get('/stories', [StoryController::class, 'index']);
         Route::get('/stories/random', [StoryController::class, 'random']);
         Route::get('/stories/fetch', [StoryController::class, 'fetch']);
-        Route::get('/stories/search/{search}', [StoryController::class, 'search']);
+        Route::get('/story/s/{search}', [StoryController::class, 'search']);
         Route::get('/stories/likes/{id}', [StoryController::class, 'likes']);
         Route::post('/stories/like/{id}', [StoryController::class, 'like']);
         Route::post('/stories/unlike/{id}', [StoryController::class, 'unlike']);
@@ -130,10 +145,11 @@ Route::group(
         Route::post('/stories/bookmark/{id}', [StoryController::class, 'bookmark']);
         Route::post('/stories/hasbookmarked/{id}', [StoryController::class, 'hasbookmarked']);
         Route::post('/stories/unbookmark/{id}', [StoryController::class, 'unbookmark']);
-        Route::post('/story/{slug}', [StoryController::class, 'find']);
+        Route::get('/story/{slug}', [StoryController::class, 'find']);
+        Route::get('/story/tag/{slug}', [StoryController::class, 'findByTag']);
         Route::post('/story', [StoryController::class, 'store']);
-        Route::put('/story/{id}', [StoryController::class, 'update']);
-        Route::delete('/story/{id}', [StoryController::class, 'destory']);
+        Route::post('/story/u/{id}', [StoryController::class, 'update']);
+        Route::delete('/story/d/{id}', [StoryController::class, 'destory']);
     }
 );
 

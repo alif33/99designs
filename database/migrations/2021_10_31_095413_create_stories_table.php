@@ -19,7 +19,6 @@ class CreateStoriesTable extends Migration
             $table->string('details', 10000);
             $table->string('summary', 505);
             $table->string('slug', 1000);
-            $table->string('tags', 155);
             $table->string('story_image', 1000)->nullable();
             $table->boolean('adult')->default(0);
             $table->boolean('stories_status')->default(0);

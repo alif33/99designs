@@ -23,8 +23,8 @@ class AuthorityController extends Controller
 
     }
 
-    public function get_contests()
-    {
+    public function index()
+    {   
         return Contest::orderBy('id', 'DESC')
         ->get();
     }
@@ -102,11 +102,6 @@ class AuthorityController extends Controller
                 );    
             }
     }
-
-
-
-
-
 
 
     public function add_story(Request $request)

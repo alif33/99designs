@@ -16,7 +16,6 @@ class Story extends Model
         'title',
         'details',
         'summary',
-        'tags',
         'slug',
         'story_image',
         'adult',
@@ -25,4 +24,9 @@ class Story extends Model
         'category_id',
         'added_by',
     ];
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 }
