@@ -29,4 +29,9 @@ class Story extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'added_by');
+    }
 }

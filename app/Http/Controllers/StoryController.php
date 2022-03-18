@@ -18,19 +18,13 @@ class StoryController extends Controller
 
     public function index()
     {   
-
-        return DB::table('stories')
-            ->join('users', 'stories.added_by', '=', 'users.id')
-            ->select('stories.*','users.name')
-            ->get();
-
+        $storyList = Story::with('user')->paginate(5);
+        return response()->json($storyList, 200);
     }
     
     public function random()
     {   
-        return DB::table('stories')
-                ->join('users', 'stories.added_by', '=', 'users.id')
-                ->select('stories.*','users.name')
+        return Story::with('user')
                 ->inRandomOrder()
                 ->take(5)
                 ->get();
@@ -137,17 +131,18 @@ class StoryController extends Controller
     {   
         return Story::where('slug', $slug)
         ->orderBy('id', 'DESC')
-        ->with(['tags'])
+        ->with(['tags', 'user'])
         ->first();
     }
 
     public function findByTag($slug)
     {
-        return Story::with(['tags'])
+        $storyList = Story::with(['tags', 'user'])
                 ->whereHas('tags', function ($query) use ($slug) {
                     $query->where('tag_slug', $slug);
                 })
-                ->get();
+                ->paginate(5);
+        return response()->json($storyList, 200);
     }
 
     public function search($search)
@@ -160,7 +155,6 @@ class StoryController extends Controller
 
     public function store(Request $request)
     {   
-
         $validator = Validator::make(
             $request->all(),
             [
